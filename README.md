@@ -60,3 +60,7 @@ bot.run()
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Starlwr/StarBot&type=Date)](https://star-history.com/#Starlwr/StarBot&Date)
+
+## 修改部分
+
+增加了SC实时推送至群聊的功能

@@ -174,7 +174,7 @@ class Up(BaseModel):
                         await redis.set_live_start_time(self.room_id, start_time)
 
                 self.__is_reconnect = True
-
+        
         @self.__room.on("LIVE")
         async def live_on(event):
             """
@@ -363,12 +363,27 @@ class Up(BaseModel):
                 base = event["data"]["data"]
                 uid = base["uid"]
                 price = base["price"]
+                message = base["message"]
+                ts = base["start_time"]
+
+                sender_uname = base["user_info"]["uname"]
 
                 # SC 统计
                 await redis.incr_room_sc_profit(self.room_id, price)
                 await redis.incr_user_sc_profit(self.room_id, uid, price)
-
                 await redis.incr_room_sc_time(self.room_id, int(time.time()), price)
+
+                # ========== 新增推送逻辑：拼出文本后推送给 Bot ==========
+
+                sc_text = (
+                    f"醒目留言 ￥{price}\n"
+                    f"{sender_uname}（{uid}）\n"
+                    f"内容：{message}\n"
+                    f"时间：{timestamp_format(ts, '%Y-%m-%d %H:%M:%S')}"
+                )
+
+                # 这里调用刚刚新增的方法
+                await self.__bot.send_super_chat(self, sc_text)
 
         guard_items = ["guard", "guard_list", "guard_diagram"]
         if not config.get("ONLY_HANDLE_NECESSARY_EVENT") or self.__any_live_report_item_enabled(guard_items):

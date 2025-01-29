@@ -405,6 +405,24 @@ class Bot(BaseModel):
                 ats = " ".join(["{at" + str(x) + "}" for x in await redis.range_dynamic_at(target.id)])
                 await self.send_message(Message(id=target.id, content=ats, type=target.type))
 
+    async def send_super_chat(self, up: Up, sc_text: str):
+        """
+        发送“醒目留言”消息给 UP 主配置的所有推送目标
+        up: 出现 SC 的 Up 对象
+        sc_text: 要发送的醒目留言文本（已在 room.py 里拼好）
+        """
+        if not isinstance(up, Up):
+            return
+        # 遍历 up 下所有推送目标，根据需要发送到群或好友
+        for target in up.targets:
+            await self.send_message(
+                Message(
+                    id=target.id,
+                    content=sc_text,         # 这里就是构造好的文本
+                    type=target.type
+                )
+            )
+
     def __eq__(self, other):
         if isinstance(other, Bot):
             return self.qq == other.qq
